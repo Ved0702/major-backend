@@ -45,16 +45,16 @@ otpRoutes.post("/getOtp", authMiddleware,async (req:AuthenticatedRequest, res:Re
         const htmlMessage = `
             <div style="width: 100%; padding: 20px; box-sizing: border-box; background-color: #f4f4f4; font-family: Arial, sans-serif;">
                 <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
-                    <h1 style="color: #333; text-align: center;">Welcome to Talent Hive</h1>
+                    <h1 style="color: #333; text-align: center;">Welcome to WorkMonkey</h1>
                     <p style="font-size: 16px; color: #555; text-align: center;">Dear User,</p>
-                    <p style="font-size: 16px; color: #555; text-align: center;">Thank you for signing up with Adhyayan. Your account has been created successfully.</p>
+                    <p style="font-size: 16px; color: #555; text-align: center;">Thank you for signing up with WorkMonkey. Your account has been created successfully.</p>
                     <p style="font-size: 16px; color: #555; text-align: center;">Please use the following OTP to verify your email address:</p>
                     <div style="text-align: center; margin: 20px 0;">
                         <h2 style="font-size: 36px; color: #e74c3c; margin: 0;">${otp}</h2>
                     </div>
                     <p style="font-size: 16px; color: #555; text-align: center;">This OTP is valid for 10 minutes.</p>
                     <p style="font-size: 14px; color: #777; text-align: center;">If you did not request this, please ignore this email.</p>
-                    <p style="font-size: 16px; color: #555; text-align: center;">Best regards,<br/>Adhyayan Team</p>
+                    <p style="font-size: 16px; color: #555; text-align: center;">Best regards,<br/>WorkMonkey</p>
                 </div>
             </div>
         `;
