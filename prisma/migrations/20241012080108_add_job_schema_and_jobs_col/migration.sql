@@ -1,0 +1,23 @@
+-- CreateEnum
+CREATE TYPE "Category" AS ENUM ('WEB_DEVELOPMENT', 'APP_DEVELOPMENT', 'AI_ML', 'SOCIAL_MEDIA_MARKETING', 'VIDEO_EDITING', 'PRODUCT_PHOTOGRAPHY', 'GRAPHIC_DESIGN', 'LOGO_DESIGN', 'SOFTWARE_DEVELOPMENT', 'BLOG_WRITING');
+
+-- CreateEnum
+CREATE TYPE "Status" AS ENUM ('PENDING', 'APPROVED');
+
+-- CreateTable
+CREATE TABLE "Job" (
+    "id" SERIAL NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "salary" TEXT NOT NULL,
+    "company" TEXT NOT NULL,
+    "category" "Category" NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "status" "Status" NOT NULL DEFAULT 'PENDING',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Job_pkey" PRIMARY KEY ("id")
+);
+
+-- AddForeignKey
+ALTER TABLE "Job" ADD CONSTRAINT "Job_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
