@@ -5,8 +5,6 @@ import jwt from 'jsonwebtoken';
 import authMiddleware,{AuthenticatedRequest} from '../middleware/authMiddleware';
 const prisma = new PrismaClient();
 const authRouter = express.Router();
-
-
 authRouter.post("/signup", async (req, res) => {
     try {
         const { name, email, password } = req.body;

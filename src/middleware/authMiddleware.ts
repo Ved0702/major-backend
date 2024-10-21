@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
 export interface AuthenticatedRequest extends Request {
-    userId?: number; // Use 'number' instead of 'Number'
+    userId?: number; 
 }
 
 const authMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
@@ -20,7 +20,7 @@ const authMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunc
 
         const decoded = jwt.verify(token, jwtSecret) as JwtPayload;
         console.log(decoded);
-        req.userId = decoded.id; // Store the user ID in the request object
+        req.userId = decoded.id;
         next();
     } catch (err:any) {
         res.status(400).json({ message: `Token is not valid ${err.message}`  });
