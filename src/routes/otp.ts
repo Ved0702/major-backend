@@ -12,7 +12,7 @@ function generateOTP(length = 6) {
     return randomize('0', length);
 }
 
-otpRoutes.post("/getOtp", ,async (req:AuthenticatedRequest, res:Response):Promise<void> => {
+otpRoutes.post("/getOtp",async (req:AuthenticatedRequest, res:Response):Promise<void> => {
     try {
         const { email } = req.body
         if (!email) {
