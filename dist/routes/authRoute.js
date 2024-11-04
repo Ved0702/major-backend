@@ -65,7 +65,7 @@ authRouter.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, functi
                 id: true,
                 email: true,
                 name: true,
-                password: true
+                password: true,
             }
         });
         if (!existingUser) {
@@ -115,6 +115,34 @@ authRouter.get("/userJob", authMiddleware_1.default, (req, res) => __awaiter(voi
             }
         });
         res.status(200).json(jobs);
+    }
+    catch (error) {
+        console.error("An error occurred:", error);
+        res.status(500).json({ error: `Internal Server Error: ${error.message}` });
+    }
+}));
+authRouter.get("/userDetail", authMiddleware_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.userId;
+        if (!userId || typeof userId !== 'number') {
+            res.status(400).json({ message: "Invalid user ID" });
+            return;
+        }
+        const user = yield prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                createdAt: true,
+                jobs: true
+            }
+        });
+        if (!user) {
+            res.status(404).json({ message: "User not found" });
+            return;
+        }
+        res.status(200).json(user);
     }
     catch (error) {
         console.error("An error occurred:", error);

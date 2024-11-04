@@ -15,7 +15,7 @@ const authMiddleware = (req, res, next) => {
         console.log(jwtSecret);
         const decoded = jsonwebtoken_1.default.verify(token, jwtSecret);
         console.log(decoded);
-        req.userId = decoded.id; // Store the user ID in the request object
+        req.userId = decoded.id;
         next();
     }
     catch (err) {

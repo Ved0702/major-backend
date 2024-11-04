@@ -18,12 +18,11 @@ const otpRoutes = express_1.default.Router();
 //@ts-ignore
 const mailer_js_1 = __importDefault(require("../mailer/mailer.js"));
 const client_1 = require("@prisma/client");
-const authMiddleware_1 = __importDefault(require("../middleware/authMiddleware"));
 const prisma = new client_1.PrismaClient();
 function generateOTP(length = 6) {
     return (0, randomatic_1.default)('0', length);
 }
-otpRoutes.post("/getOtp", authMiddleware_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+otpRoutes.post("/getOtp", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email } = req.body;
         if (!email) {

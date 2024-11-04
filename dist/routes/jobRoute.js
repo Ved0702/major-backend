@@ -84,7 +84,7 @@ jobRouter.get("/getJobs", authMiddleware_1.default, (req, res) => __awaiter(void
     }
 }));
 // GET route to fetch jobs by category
-jobRouter.get("/getCategoryJobs/:category", authMiddleware_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+jobRouter.get("/getCategoryJobs/:category", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { category } = req.params;
     // Validate category
     if (!isValidCategory(category)) {
@@ -101,6 +101,22 @@ jobRouter.get("/getCategoryJobs/:category", authMiddleware_1.default, (req, res)
     }
     catch (error) {
         console.error("An error occurred while fetching category jobs:", error);
+        res.status(500).json({ error: `Internal Server Error: ${error.message}` });
+    }
+}));
+// GET route to fetch 5 recent jobs
+jobRouter.get("/getRecentJobs", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const recentJobs = yield prisma.job.findMany({
+            orderBy: {
+                createdAt: "desc",
+            },
+            take: 5,
+        });
+        res.json(recentJobs);
+    }
+    catch (error) {
+        console.error("An error occurred while fetching recent jobs:", error);
         res.status(500).json({ error: `Internal Server Error: ${error.message}` });
     }
 }));

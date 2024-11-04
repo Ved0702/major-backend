@@ -78,7 +78,7 @@ jobRouter.get("/getJobs", authMiddleware, async (req: AuthenticatedRequest, res:
 });
 
 // GET route to fetch jobs by category
-jobRouter.get("/getCategoryJobs/:category", authMiddleware, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+jobRouter.get("/getCategoryJobs/:category", async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { category } = req.params;
 
     // Validate category
@@ -96,6 +96,21 @@ jobRouter.get("/getCategoryJobs/:category", authMiddleware, async (req: Authenti
         res.json(jobs);
     } catch (error: any) {
         console.error("An error occurred while fetching category jobs:", error);
+        res.status(500).json({ error: `Internal Server Error: ${error.message}` });
+    }
+});
+// GET route to fetch 5 recent jobs
+jobRouter.get("/getRecentJobs", async (req: Request, res: Response): Promise<void> => {
+    try {
+        const recentJobs = await prisma.job.findMany({
+            orderBy: {
+                createdAt: "desc",
+            },
+            take: 5,
+        });
+        res.json(recentJobs);
+    } catch (error: any) {
+        console.error("An error occurred while fetching recent jobs:", error);
         res.status(500).json({ error: `Internal Server Error: ${error.message}` });
     }
 });
