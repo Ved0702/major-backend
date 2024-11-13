@@ -68,6 +68,28 @@ jobRouter.post("/postJob", authMiddleware_1.default, (req, res) => __awaiter(voi
         res.status(500).json({ error: `Internal Server Error: ${error.message}` });
     }
 }));
+jobRouter.get("/jobDetail", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.query;
+    console.log(id);
+    try {
+        const job = yield prisma.job.findUnique({
+            where: {
+                id: Number(id),
+            },
+            include: { appliedUser: true },
+        });
+        if (job) {
+            res.json(job);
+        }
+        else {
+            res.status(404).json({ message: "Job not found" });
+        }
+    }
+    catch (error) {
+        console.error("An error occurred while fetching job details:", error);
+        res.status(500).json({ error: `Internal Server Error: ${error.message}` });
+    }
+}));
 // GET route to fetch jobs for the authenticated user
 jobRouter.get("/getJobs", authMiddleware_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -94,13 +116,47 @@ jobRouter.get("/getCategoryJobs/:category", (req, res) => __awaiter(void 0, void
     try {
         const jobs = yield prisma.job.findMany({
             where: {
-                category, // Use the category as is, since it is a string
+                category, // Use the category as it is, since it is a string
             },
         });
         res.json(jobs);
     }
     catch (error) {
         console.error("An error occurred while fetching category jobs:", error);
+        res.status(500).json({ error: `Internal Server Error: ${error.message}` });
+    }
+}));
+jobRouter.patch("/applyJob", authMiddleware_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { jobId } = req.body;
+    console.log(jobId);
+    try {
+        const job = yield prisma.job.update({
+            where: {
+                id: Number(jobId),
+            },
+            data: {
+                appliedUser: {
+                    connect: { id: Number(req.userId) },
+                },
+            },
+            include: {
+                appliedUser: {
+                    select: {
+                        id: true,
+                        email: true,
+                        name: true,
+                    },
+                },
+            },
+        });
+        if (!job) {
+            res.status(404).json({ message: "Job not found" });
+            return;
+        }
+        res.json(job);
+    }
+    catch (error) {
+        console.error("An error occurred while applying for the job:", error);
         res.status(500).json({ error: `Internal Server Error: ${error.message}` });
     }
 }));

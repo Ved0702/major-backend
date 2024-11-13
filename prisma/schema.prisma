@@ -30,25 +30,28 @@ model User {
   name        String
   email       String   @unique
   password    String
-  isVerified  Boolean   @default(false)
+  isVerified  Boolean  @default(false)
   createdAt   DateTime @default(now())
-  jobs        Job[]    @relation("AuthorJobs") // Add this line to establish the relation
+  jobs        Job[]    @relation("AuthorJobs")    // Jobs created by the user
+  appliedJobs Job[]    @relation("AppliedUser")   // Jobs to which the user has applied
 }
 
 model Job {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  salary      String   
-  company     String
-  category    Category 
-  userId      Int
-  skills      String[] @default([])
-  author      User     @relation("AuthorJobs", fields: [userId], references: [id]) 
-  status      Status   @default(PENDING)
-  createdAt   DateTime @default(now())
-  deadline    DateTime
-  imageUrl    String
+  id            Int      @id @default(autoincrement())
+  title         String
+  description   String
+  salary        String   
+  company       String
+  category      Category 
+  userId        Int
+  skills        String[] @default([])
+  author        User     @relation("AuthorJobs", fields: [userId], references: [id]) 
+  status        Status   @default(PENDING)
+  createdAt     DateTime @default(now())
+  deadline      DateTime
+  imageUrl      String
+  appliedUserId Int?     // Foreign key for the applied user
+  appliedUser   User?    @relation("AppliedUser", fields: [appliedUserId], references: [id]) // Single user who applied
 }
 
 model OTP{

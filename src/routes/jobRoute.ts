@@ -61,6 +61,26 @@ jobRouter.post("/postJob", authMiddleware, async (req: AuthenticatedRequest, res
         res.status(500).json({ error: `Internal Server Error: ${error.message}` });
     }
 });
+jobRouter.get("/jobDetail", async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.query;
+    console.log(id);
+    try {
+        const job = await prisma.job.findUnique({
+            where: {
+                id: Number(id),
+            },
+            include: { appliedUser: true },
+        });
+        if (job) {
+            res.json(job);
+        } else {
+            res.status(404).json({ message: "Job not found" });
+        }
+    } catch (error: any) {
+        console.error("An error occurred while fetching job details:", error);
+        res.status(500).json({ error: `Internal Server Error: ${error.message}` });
+    }
+});
 
 // GET route to fetch jobs for the authenticated user
 jobRouter.get("/getJobs", authMiddleware, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -77,6 +97,7 @@ jobRouter.get("/getJobs", authMiddleware, async (req: AuthenticatedRequest, res:
     }
 });
 
+
 // GET route to fetch jobs by category
 jobRouter.get("/getCategoryJobs/:category", async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { category } = req.params;
@@ -90,12 +111,49 @@ jobRouter.get("/getCategoryJobs/:category", async (req: AuthenticatedRequest, re
     try {
         const jobs = await prisma.job.findMany({
             where: {
-                category, // Use the category as is, since it is a string
+                category, // Use the category as it is, since it is a string
             },
         });
         res.json(jobs);
     } catch (error: any) {
         console.error("An error occurred while fetching category jobs:", error);
+        res.status(500).json({ error: `Internal Server Error: ${error.message}` });
+    }
+});
+jobRouter.patch("/applyJob", authMiddleware, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { jobId } = req.body;
+    console.log(jobId);
+    
+    try {
+        const job = await prisma.job.update({
+            where: {
+            id: Number(jobId),
+            },
+            data: {
+            appliedUser: {
+                connect: { id: Number(req.userId) },
+            },
+            },
+            include: {
+            appliedUser: {
+                select: {
+                id: true,
+                email: true,
+                name: true,
+                },
+            },
+            },
+        });
+
+        if (!job) {
+            res.status(404).json({ message: "Job not found" });
+            return;
+        }
+
+        res.json(job);
+        
+    } catch (error: any) {
+        console.error("An error occurred while applying for the job:", error);
         res.status(500).json({ error: `Internal Server Error: ${error.message}` });
     }
 });
