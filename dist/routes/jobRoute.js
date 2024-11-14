@@ -130,6 +130,28 @@ jobRouter.patch("/applyJob", authMiddleware_1.default, (req, res) => __awaiter(v
     const { jobId } = req.body;
     console.log(jobId);
     try {
+        // Check if the job already has an applied user
+        const existingApplication = yield prisma.job.findUnique({
+            where: {
+                id: Number(jobId),
+            },
+            select: {
+                appliedUser: true,
+            },
+        });
+        if (existingApplication === null || existingApplication === void 0 ? void 0 : existingApplication.appliedUser) {
+            res.status(400).json({ message: "Job already applied by another user" });
+            return;
+        }
+        // Update job status to "APPLIED"
+        yield prisma.job.update({
+            where: {
+                id: Number(jobId),
+            },
+            data: {
+                status: "APPLIED",
+            },
+        });
         const job = yield prisma.job.update({
             where: {
                 id: Number(jobId),
@@ -157,6 +179,65 @@ jobRouter.patch("/applyJob", authMiddleware_1.default, (req, res) => __awaiter(v
     }
     catch (error) {
         console.error("An error occurred while applying for the job:", error);
+        res.status(500).json({ error: `Internal Server Error: ${error.message}` });
+    }
+}));
+jobRouter.get("/checkStatus", authMiddleware_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.query;
+        console.log(id);
+        const jobStatus = yield prisma.job.findUnique({
+            where: {
+                id: Number(id),
+            },
+            select: {
+                status: true,
+            },
+        });
+        if (!jobStatus) {
+            res.status(404).json({ message: "Job not found" });
+            return;
+        }
+        res.json(jobStatus);
+    }
+    catch (error) {
+        console.error("An error occurred while checking job status:", error);
+        res.status(500).json({ error: `Internal Server Error: ${error.message}` });
+    }
+}));
+jobRouter.patch("/completeJob", authMiddleware_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { jobId } = req.body;
+    console.log(jobId);
+    try {
+        const job = yield prisma.job.update({
+            where: {
+                id: Number(jobId),
+            },
+            data: {
+                status: "COMPLETED",
+            },
+        });
+        // Check if the user making the request is the one who posted the job
+        const jobDetails = yield prisma.job.findUnique({
+            where: {
+                id: Number(jobId),
+            },
+            select: {
+                userId: true,
+            },
+        });
+        if (!jobDetails || jobDetails.userId !== req.userId) {
+            res.status(403).json({ message: "You are not authorized to complete this job" });
+            return;
+        }
+        if (!job) {
+            res.status(404).json({ message: "Job not found" });
+            return;
+        }
+        res.json(job);
+    }
+    catch (error) {
+        console.error("An error occurred while completing the job:", error);
         res.status(500).json({ error: `Internal Server Error: ${error.message}` });
     }
 }));

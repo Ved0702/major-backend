@@ -125,7 +125,8 @@ authRouter.get("/userDetail", authMiddleware, async (req: AuthenticatedRequest, 
                 name: true,
                 email: true,
                 createdAt: true,
-                jobs:true
+                jobs:true,
+                appliedJobs:true,
             }
         });
 

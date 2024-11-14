@@ -125,23 +125,47 @@ jobRouter.patch("/applyJob", authMiddleware, async (req: AuthenticatedRequest, r
     console.log(jobId);
     
     try {
-        const job = await prisma.job.update({
+        // Check if the job already has an applied user
+        const existingApplication = await prisma.job.findUnique({
             where: {
-            id: Number(jobId),
+                id: Number(jobId),
+            },
+            select: {
+                appliedUser: true,
+            },
+        });
+
+        if (existingApplication?.appliedUser) {
+            res.status(400).json({ message: "Job already applied by another user" });
+            return;
+        }
+
+        // Update job status to "APPLIED"
+        await prisma.job.update({
+            where: {
+                id: Number(jobId),
             },
             data: {
-            appliedUser: {
-                connect: { id: Number(req.userId) },
+                status: "APPLIED",
             },
+        });
+        const job = await prisma.job.update({
+            where: {
+                id: Number(jobId),
             },
-            include: {
-            appliedUser: {
-                select: {
-                id: true,
-                email: true,
-                name: true,
+            data: {
+                appliedUser: {
+                    connect: { id: Number(req.userId) },
                 },
             },
+            include: {
+                appliedUser: {
+                    select: {
+                        id: true,
+                        email: true,
+                        name: true,
+                    },
+                },
             },
         });
 
@@ -154,6 +178,69 @@ jobRouter.patch("/applyJob", authMiddleware, async (req: AuthenticatedRequest, r
         
     } catch (error: any) {
         console.error("An error occurred while applying for the job:", error);
+        res.status(500).json({ error: `Internal Server Error: ${error.message}` });
+    }
+});
+jobRouter.get("/checkStatus", authMiddleware, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const {id}=req.query;
+        console.log(id);
+        const jobStatus = await prisma.job.findUnique({
+            where: {
+                id: Number(id),
+            },
+            select: {
+                status: true,
+            },
+        });
+        if (!jobStatus){
+            res.status(404).json({ message: "Job not found" });
+            return;
+        }
+        res.json(jobStatus);
+        
+    } catch (error: any) {
+        console.error("An error occurred while checking job status:", error);
+        res.status(500).json({ error: `Internal Server Error: ${error.message}` });
+        
+    }
+});
+jobRouter.patch("/completeJob", authMiddleware, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { jobId } = req.body;
+    console.log(jobId);
+    
+    try {
+        const job = await prisma.job.update({
+            where: {
+                id: Number(jobId),
+            },
+            data: {
+                status: "COMPLETED",
+            },
+        });
+    // Check if the user making the request is the one who posted the job
+    const jobDetails = await prisma.job.findUnique({
+        where: {
+            id: Number(jobId),
+        },
+        select: {
+            userId: true,
+        },
+    });
+
+    if (!jobDetails || jobDetails.userId !== req.userId) {
+        res.status(403).json({ message: "You are not authorized to complete this job" });
+        return;
+    }
+        if (!job) {
+            res.status(404).json({ message: "Job not found" });
+            return;
+        }
+
+        res.json(job);
+        
+    } catch (error: any) {
+        console.error("An error occurred while completing the job:", error);
         res.status(500).json({ error: `Internal Server Error: ${error.message}` });
     }
 });
@@ -172,5 +259,6 @@ jobRouter.get("/getRecentJobs", async (req: Request, res: Response): Promise<voi
         res.status(500).json({ error: `Internal Server Error: ${error.message}` });
     }
 });
+
 
 export default jobRouter;

@@ -22,7 +22,8 @@ enum Category {
 
 enum Status {
   PENDING
-  APPROVED
+  APPLIED
+  COMPLETED
 }
 
 model User {

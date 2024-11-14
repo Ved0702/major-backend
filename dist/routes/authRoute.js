@@ -135,7 +135,8 @@ authRouter.get("/userDetail", authMiddleware_1.default, (req, res) => __awaiter(
                 name: true,
                 email: true,
                 createdAt: true,
-                jobs: true
+                jobs: true,
+                appliedJobs: true,
             }
         });
         if (!user) {
